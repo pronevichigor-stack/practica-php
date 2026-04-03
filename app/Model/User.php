@@ -11,10 +11,13 @@ class User extends Model implements IdentityInterface
     use HasFactory;
 
     public $timestamps = false;
+
+    // Добавляем 'role', чтобы Laravel разрешил его записывать
     protected $fillable = [
         'name',
         'login',
-        'password'
+        'password',
+        'role'
     ];
 
     protected static function booted()
@@ -25,19 +28,16 @@ class User extends Model implements IdentityInterface
         });
     }
 
-    //Выборка пользователя по первичному ключу
     public function findIdentity(int $id)
     {
         return self::where('id', $id)->first();
     }
 
-    //Возврат первичного ключа
     public function getId(): int
     {
         return $this->id;
     }
 
-    //Возврат аутентифицированного пользователя
     public function attemptIdentity(array $credentials)
     {
         return self::where(['login' => $credentials['login'],

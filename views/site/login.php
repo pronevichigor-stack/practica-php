@@ -1,13 +1,20 @@
-<h2>Авторизация</h2>
-<h3><?= $message ?? ''; ?></h3>
+<div class="card" style="max-width: 400px; margin: auto; text-align: center;">
+    <h2>Авторизация</h2>
+    <p style="color: red;"><?= $message ?? ''; ?></p>
 
-<h3><?= app()->auth->user()->name ?? ''; ?></h3>
-<?php
-if (!app()->auth::check()):
-    ?>
-    <form method="post">
-        <label>Логин <input type="text" name="login"></label>
-        <label>Пароль <input type="password" name="password"></label>
-        <button>Войти</button>
-    </form>
-<?php endif;
+    <?php if (!app()->auth::check()): ?>
+        <form method="post">
+            <div style="text-align: left;">
+                <label>Логин</label>
+                <input type="text" name="login" required>
+
+                <label>Пароль</label>
+                <input type="password" name="password" required>
+            </div>
+            <button class="btn" style="width: 100%;">Войти в систему</button>
+        </form>
+    <?php else: ?>
+        <p>Вы уже вошли как <b><?= app()->auth->user()->name ?></b></p>
+        <a href="<?= app()->route->getUrl('/logout') ?>" class="btn">Выйти</a>
+    <?php endif; ?>
+</div>

@@ -18,7 +18,9 @@ class Site
     public function signup(Request $request): string
     {
         if ($request->method === 'POST') {
+            // Пытаемся создать пользователя с данными из формы
             if (User::create($request->all())) {
+                // Если успешно — идем на главную
                 app()->route->redirect('/hello');
             }
         }
@@ -30,10 +32,14 @@ class Site
         if ($request->method === 'GET') {
             return new View('site.login');
         }
+
+        // Пытаемся авторизовать
         if (Auth::attempt($request->all())) {
             app()->route->redirect('/hello');
         }
-        return new View('site.login', ['message' => 'Неправильные логин или пароль']);
+
+        // Если данные не подошли
+        return new View('site.login', ['message' => 'Ошибка: Неверный логин или пароль']);
     }
 
     public function logout(): void

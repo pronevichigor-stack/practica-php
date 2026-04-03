@@ -1,0 +1,88 @@
+:root {
+    --primary: #007bff;
+    --light-blue: #e7f1ff;
+    --white: #ffffff;
+    --bg: #f8f9fa;
+    --text: #333;
+    --border: #dee2e6;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+}
+
+header {
+    background: var(--primary);
+    padding: 1rem 2rem;
+    color: white;
+}
+
+nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+nav a:hover { opacity: 0.8; }
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+h2 { color: var(--primary); margin-top: 0; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    background: var(--light-blue);
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid var(--primary);
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.btn {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+}
+
+form label { display: block; margin-bottom: 5px; font-weight: bold; }
+form input, form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}

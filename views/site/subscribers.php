@@ -1,5 +1,27 @@
 <div class="card">
-    <h2>Список абонентов внутренней связи</h2>
+    <h2>Список абонентов</h2>
+
+    <div class="actions">
+        <a href="<?= app()->route->getUrl('/subscribers/create') ?>" class="btn">➕ Добавить абонента</a>
+        <a href="<?= app()->route->getUrl('/subscribers/attach-phone') ?>" class="btn">📞 Привязать телефон</a>
+    </div>
+
+    <!-- Фильтр -->
+    <form method="get" class="filter-form">
+        <label>Фильтр по подразделению:</label>
+        <select name="subdivision_id" onchange="this.form.submit()">
+            <option value="">Все подразделения</option>
+            <?php foreach ($subdivisions as $sd): ?>
+                <option value="<?= $sd->subdivision_id ?>" <?= ($selectedSubdivision ?? '') == $sd->subdivision_id ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($sd->name) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </form>
+
+    <?php if (isset($_GET['message'])): ?>
+        <div class="success"><?= htmlspecialchars($_GET['message']) ?></div>
+    <?php endif; ?>
 
     <table>
         <thead>
@@ -8,25 +30,24 @@
             <th>Имя</th>
             <th>Отчество</th>
             <th>Подразделение</th>
-            <th>Телефон</th>
+            <th>Телефоны</th>
         </tr>
         </thead>
         <tbody>
-        <?php if (empty($subscribers)): ?>
+        <?php foreach ($subscribers as $sub): ?>
             <tr>
-                <td colspan="5" style="text-align: center;">Абоненты пока не добавлены</td>
+                <td><?= htmlspecialchars($sub->last_name) ?></td>
+                <td><?= htmlspecialchars($sub->first_name) ?></td>
+                <td><?= htmlspecialchars($sub->middle_name ?? '') ?></td>
+                <td><?= htmlspecialchars($sub->subdivision->name ?? '—') ?></td>
+                <td>
+                    <?php
+                    $numbers = $sub->phones->pluck('phone_number')->toArray();
+                    echo !empty($numbers) ? implode(', ', $numbers) : '—';
+                    ?>
+                </td>
             </tr>
-        <?php else: ?>
-            <?php foreach ($subscribers as $s): ?>
-                <tr>
-                    <td><?= $s->last_name ?></td>
-                    <td><?= $s->first_name ?></td>
-                    <td><?= $s->middle_name ?></td>
-                    <td><?= $s->subdivision ?></td>
-                    <td><?= $s->phone ?></td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
+        <?php endforeach; ?>
         </tbody>
     </table>
 </div>

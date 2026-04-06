@@ -11,36 +11,50 @@ class User extends Model implements IdentityInterface
     use HasFactory;
 
     public $timestamps = false;
-
-    // Добавляем 'role', чтобы Laravel разрешил его записывать
+    protected $table = 'user';
+    protected $primaryKey = 'id_user';
     protected $fillable = [
         'name',
         'login',
         'password',
-        'role'
+        'id_role'
     ];
 
-    protected static function booted()
+    // Связь с ролью
+    public function role()
     {
-        static::created(function ($user) {
-            $user->password = md5($user->password);
-            $user->save();
-        });
+        return $this->belongsTo(Role::class, 'id_role', 'id_role');
     }
 
+    // Проверка ролей (исправлено под вашу БД)
+    public function isAdmin(): bool
+    {
+        // В вашей БД: id_role = 2 -> admin
+        return $this->id_role == 2;
+    }
+
+    public function isSysAdmin(): bool
+    {
+        // В вашей БД: id_role = 1 -> sysadmin
+        return $this->id_role == 1;
+    }
+
+    // --- IdentityInterface ---
     public function findIdentity(int $id)
     {
-        return self::where('id', $id)->first();
+        return self::where('id_user', $id)->first();
     }
 
     public function getId(): int
     {
-        return $this->id;
+        return $this->id_user;
     }
 
     public function attemptIdentity(array $credentials)
     {
-        return self::where(['login' => $credentials['login'],
-            'password' => md5($credentials['password'])])->first();
+        return self::where([
+            'login' => $credentials['login'],
+            'password' => md5($credentials['password'])
+        ])->first();
     }
 }

@@ -40,15 +40,22 @@
         <a href="<?= app()->route->getUrl('/') ?>">Главная</a>
 
         <?php if (app()->auth::check()): ?>
-            <?php if (app()->auth::user()->role->name === 'sysadmin'): ?>
+            <?php
+            $user = app()->auth::user();
+            // В вашей БД: id_role = 1 -> sysadmin, id_role = 2 -> admin
+            ?>
+
+            <?php if ($user->id_role == 1): // Системный администратор ?>
                 <a href="<?= app()->route->getUrl('/subscribers') ?>">Абоненты</a>
                 <a href="<?= app()->route->getUrl('/subdivisions') ?>">Подразделения</a>
                 <a href="<?= app()->route->getUrl('/rooms') ?>">Помещения</a>
                 <a href="<?= app()->route->getUrl('/phones') ?>">Телефоны</a>
-            <?php elseif (app()->auth::user()->role->name === 'admin'): ?>
+                <a href="<?= app()->route->getUrl('/report/subdivision') ?>">Отчеты</a>
+            <?php elseif ($user->id_role == 2): // Администратор ?>
                 <a href="<?= app()->route->getUrl('/admin/create-sysadmin') ?>">Создать сисадмина</a>
             <?php endif; ?>
-            <a href="<?= app()->route->getUrl('/logout') ?>" style="float:right">Выход (<?= htmlspecialchars(app()->auth::user()->name) ?>)</a>
+
+            <a href="<?= app()->route->getUrl('/logout') ?>" style="float:right">Выход (<?= htmlspecialchars($user->name) ?>)</a>
         <?php else: ?>
             <a href="<?= app()->route->getUrl('/login') ?>" style="float:right">Вход</a>
             <a href="<?= app()->route->getUrl('/signup') ?>" style="float:right">Регистрация</a>

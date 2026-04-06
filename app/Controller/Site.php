@@ -22,8 +22,13 @@ class Site
     {
         if ($request->method === 'POST') {
             $data = $request->all();
-            // По умолчанию создаем пользователя с ролью sysadmin (id_role = 1)
-            $data['id_role'] = 1;
+            // Проверка на уникальность логина
+            $existingUser = User::where('login', $data['login'])->first();
+            if ($existingUser) {
+                return new View('site.signup', ['error' => 'Пользователь с таким логином уже существует!']);
+            }
+            $data['id_role'] = 1; // По умолчанию sysadmin
+            $data['password'] = md5($data['password']); // Хешируем пароль
             if (User::create($data)) {
                 app()->route->redirect('/hello');
             }
@@ -215,7 +220,6 @@ class Site
 
     // ==================== ДОСТУПНО ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ====================
 
-    // Создание нового сисадмина (только для администратора)
     public function createSysAdmin(Request $request): string
     {
         if (!$this->isAdmin()) {
@@ -223,25 +227,21 @@ class Site
         }
 
         if ($request->method === 'POST') {
+            // Проверка на уникальность логина
+            $existingUser = User::where('login', $request->login)->first();
+            if ($existingUser) {
+                return new View('site.create_sysadmin', ['error' => 'Пользователь с таким логином уже существует!']);
+            }
+
             $data = $request->all();
             $data['id_role'] = 1; // id_role = 1 для sysadmin
+            // Хешируем пароль в MD5
+            $data['password'] = md5($data['password']);
+
             if (User::create($data)) {
-                app()->route->redirect('/hello?message=Системный администратор создан');
+                app()->route->redirect('/hello?message=Системный администратор создан. Логин: ' . $data['login']);
             }
         }
         return new View('site.create_sysadmin');
-    }
-
-    // ==================== ДОСТУПНО ВСЕМ АВТОРИЗОВАННЫМ ====================
-
-    // Главная страница после входа (показывает меню в зависимости от роли)
-    public function dashboard(): string
-    {
-        if (!Auth::check()) {
-            app()->route->redirect('/login');
-        }
-
-        $user = Auth::user();
-        return new View('site.dashboard', ['user' => $user]);
     }
 }

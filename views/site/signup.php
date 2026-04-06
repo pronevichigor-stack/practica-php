@@ -1,5 +1,10 @@
 <div class="card" style="max-width: 400px; margin: auto;">
     <h2>Регистрация</h2>
+
+    <?php if (isset($error)): ?>
+        <div class="error"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
     <form method="post">
         <label>ФИО</label>
         <input type="text" name="name" required>

@@ -41,8 +41,8 @@
                     <td><?= htmlspecialchars($sd->name) ?></td>
                     <td><?= htmlspecialchars($sd->type->name ?? '—') ?></td>  <!-- ИСПРАВЛЕНО -->
                     <td>
-                        <a href="<?= app()->route->getUrl('/room/delete/' . $room->room_id) ?>"
-                           onclick="return confirm('Удалить помещение?')"
+                        <a href="<?= app()->route->getUrl('/subdivision/delete/' . $sd->subdivision_id) ?>"
+                           onclick="return confirm('Удалить подразделение?')"
                            style="color: red; text-decoration: none;">🗑 Удалить</a>
                     </td>
                 </tr>

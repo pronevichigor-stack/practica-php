@@ -261,13 +261,12 @@ class Site
         return new View('site.create_sysadmin');
     }
 // Удаление подразделения
-    public function deleteSubdivision(Request $request): void
+    public function deleteSubdivision($id): void
     {
         if (!$this->isSysAdmin()) {
             app()->route->redirect('/hello?message=Доступ запрещен');
         }
 
-        $id = $request->get('id');
         $subdivision = Subdivision::find($id);
         if ($subdivision) {
             $subdivision->delete();
@@ -278,16 +277,15 @@ class Site
     }
 
 // Удаление помещения
-    public function deleteRoom(Request $request): void
+    public function deleteRoom($id): void
     {
         if (!$this->isSysAdmin()) {
             app()->route->redirect('/hello?message=Доступ запрещен');
         }
 
-        $id = $request->get('id');
         $room = Room::find($id);
         if ($room) {
-            // Сначала удаляем связанные телефоны или отвязываем их
+            // Сначала удаляем связанные телефоны
             foreach ($room->phones as $phone) {
                 $phone->subscribers()->detach();
                 $phone->delete();
@@ -300,16 +298,15 @@ class Site
     }
 
 // Удаление телефона
-    public function deletePhone(Request $request): void
+    public function deletePhone($id): void
     {
         if (!$this->isSysAdmin()) {
             app()->route->redirect('/hello?message=Доступ запрещен');
         }
 
-        $id = $request->get('id');
         $phone = Phone::find($id);
         if ($phone) {
-            // Сначала отвязываем от абонентов
+            // Отвязываем от абонентов
             $phone->subscribers()->detach();
             $phone->delete();
             app()->route->redirect('/phones?message=Телефон удален');

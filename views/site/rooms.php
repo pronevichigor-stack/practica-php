@@ -45,7 +45,7 @@
                     <td><?= htmlspecialchars($room->subdivision->name ?? '—') ?></td>
                     <td>
                         <a href="<?= app()->route->getUrl('/room/delete/' . $room->room_id) ?>"
-                           onclick="return confirm('Удалить помещение «<?= htmlspecialchars($room->name) ?>»? Все связанные телефоны также будут удалены!')"
+                           onclick="return confirm('Удалить помещение?')"
                            style="color: red; text-decoration: none;">🗑 Удалить</a>
                     </td>
                 </tr>

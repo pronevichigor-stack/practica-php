@@ -11,7 +11,13 @@ class Subdivision extends Model
     public $timestamps = false;
     protected $table = 'subdivision';
     protected $primaryKey = 'subdivision_id';
-    protected $fillable = ['name', 'type'];
+    protected $fillable = ['name', 'type_id'];
+
+    // Связь с типом подразделения
+    public function type()
+    {
+        return $this->belongsTo(TypeOfUnit::class, 'type_id', 'type_id');
+    }
 
     public function rooms()
     {

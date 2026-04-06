@@ -10,12 +10,24 @@ use Model\Subdivision;
 use Model\Phone;
 use Model\Room;
 use Src\Auth\Auth;
+use Model\TypeOfUnit;
 
 class Site
 {
     public function hello(): string
     {
         return new View('site.hello', ['message' => 'Добро пожаловать в систему учета абонентов']);
+    }
+
+    // Главная страница после входа
+    public function dashboard(): string
+    {
+        if (!Auth::check()) {
+            app()->route->redirect('/login');
+        }
+
+        $user = Auth::user();
+        return new View('site.dashboard', ['user' => $user]);
     }
 
     public function signup(Request $request): string
@@ -43,7 +55,7 @@ class Site
         }
 
         if (Auth::attempt($request->all())) {
-            app()->route->redirect('/hello');
+            app()->route->redirect('/');
         }
 
         return new View('site.login', ['message' => 'Ошибка: Неверный логин или пароль']);
@@ -60,7 +72,6 @@ class Site
     {
         if (!Auth::check()) return false;
         $user = Auth::user();
-        // В вашей БД: id_role = 1 -> sysadmin
         return $user->id_role == 1;
     }
 
@@ -69,7 +80,6 @@ class Site
     {
         if (!Auth::check()) return false;
         $user = Auth::user();
-        // В вашей БД: id_role = 2 -> admin
         return $user->id_role == 2;
     }
 
@@ -85,8 +95,9 @@ class Site
         $query = Subscriber::with('subdivision', 'phones');
 
         // Фильтр по подразделению
-        if ($request->subdivision_id && $request->subdivision_id !== '') {
-            $query->where('subdivision_id', $request->subdivision_id);
+        $subdivisionId = $request->get('subdivision_id');
+        if ($subdivisionId && $subdivisionId !== '') {
+            $query->where('subdivision_id', $subdivisionId);
         }
 
         $subscribers = $query->get();
@@ -95,7 +106,7 @@ class Site
         return new View('site.subscribers', [
             'subscribers' => $subscribers,
             'subdivisions' => $subdivisions,
-            'selectedSubdivision' => $request->subdivision_id
+            'selectedSubdivision' => $subdivisionId
         ]);
     }
 
@@ -108,7 +119,7 @@ class Site
 
         if ($request->method === 'POST') {
             $data = $request->all();
-            $data['created_by'] = Auth::user()->id_user; // Кто создал
+            $data['created_by'] = Auth::user()->id_user;
             if (Subscriber::create($data)) {
                 app()->route->redirect('/subscribers?message=Абонент добавлен');
             }
@@ -127,9 +138,9 @@ class Site
         }
 
         if ($request->method === 'POST') {
-            $subscriber = Subscriber::find($request->subscriber_id);
-            if ($subscriber && $request->phone_id) {
-                $subscriber->phones()->attach($request->phone_id);
+            $subscriber = Subscriber::find($request->get('subscriber_id'));
+            if ($subscriber && $request->get('phone_id')) {
+                $subscriber->phones()->attach($request->get('phone_id'));
                 app()->route->redirect('/subscribers?message=Телефон привязан');
             }
         }
@@ -170,15 +181,21 @@ class Site
         }
 
         if ($request->method === 'POST') {
-            Subdivision::create($request->all());
+            $data = $request->all();
+            Subdivision::create($data);
             app()->route->redirect('/subdivisions?message=Подразделение добавлено');
         }
 
-        $subdivisions = Subdivision::all();
-        return new View('site.subdivisions', ['subdivisions' => $subdivisions]);
+        $subdivisions = Subdivision::with('type')->get();
+        $types = TypeOfUnit::all(); // Нужно добавить эту модель
+
+        return new View('site.subdivisions', [
+            'subdivisions' => $subdivisions,
+            'types' => $types
+        ]);
     }
 
-    // Управление помещениями
+// Управление помещениями
     public function rooms(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -197,7 +214,6 @@ class Site
             'subdivisions' => $subdivisions
         ]);
     }
-
     // Управление телефонами
     public function phones(Request $request): string
     {
@@ -210,7 +226,7 @@ class Site
             app()->route->redirect('/phones?message=Телефон добавлен');
         }
 
-        $phones = Phone::with('room')->get();
+        $phones = Phone::with('room', 'subscribers')->get();
         $rooms = Room::all();
         return new View('site.phones', [
             'phones' => $phones,
@@ -220,6 +236,7 @@ class Site
 
     // ==================== ДОСТУПНО ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ====================
 
+    // Создание нового сисадмина (только для администратора)
     public function createSysAdmin(Request $request): string
     {
         if (!$this->isAdmin()) {
@@ -228,20 +245,76 @@ class Site
 
         if ($request->method === 'POST') {
             // Проверка на уникальность логина
-            $existingUser = User::where('login', $request->login)->first();
+            $existingUser = User::where('login', $request->get('login'))->first();
             if ($existingUser) {
                 return new View('site.create_sysadmin', ['error' => 'Пользователь с таким логином уже существует!']);
             }
 
             $data = $request->all();
             $data['id_role'] = 1; // id_role = 1 для sysadmin
-            // Хешируем пароль в MD5
-            $data['password'] = md5($data['password']);
+            $data['password'] = md5($data['password']); // Хешируем пароль
 
             if (User::create($data)) {
                 app()->route->redirect('/hello?message=Системный администратор создан. Логин: ' . $data['login']);
             }
         }
         return new View('site.create_sysadmin');
+    }
+// Удаление подразделения
+    public function deleteSubdivision(Request $request): void
+    {
+        if (!$this->isSysAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $id = $request->get('id');
+        $subdivision = Subdivision::find($id);
+        if ($subdivision) {
+            $subdivision->delete();
+            app()->route->redirect('/subdivisions?message=Подразделение удалено');
+        } else {
+            app()->route->redirect('/subdivisions?message=Подразделение не найдено');
+        }
+    }
+
+// Удаление помещения
+    public function deleteRoom(Request $request): void
+    {
+        if (!$this->isSysAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $id = $request->get('id');
+        $room = Room::find($id);
+        if ($room) {
+            // Сначала удаляем связанные телефоны или отвязываем их
+            foreach ($room->phones as $phone) {
+                $phone->subscribers()->detach();
+                $phone->delete();
+            }
+            $room->delete();
+            app()->route->redirect('/rooms?message=Помещение удалено');
+        } else {
+            app()->route->redirect('/rooms?message=Помещение не найдено');
+        }
+    }
+
+// Удаление телефона
+    public function deletePhone(Request $request): void
+    {
+        if (!$this->isSysAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $id = $request->get('id');
+        $phone = Phone::find($id);
+        if ($phone) {
+            // Сначала отвязываем от абонентов
+            $phone->subscribers()->detach();
+            $phone->delete();
+            app()->route->redirect('/phones?message=Телефон удален');
+        } else {
+            app()->route->redirect('/phones?message=Телефон не найден');
+        }
     }
 }

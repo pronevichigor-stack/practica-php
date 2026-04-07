@@ -34,13 +34,12 @@ class Site
     {
         if ($request->method === 'POST') {
             $data = $request->all();
-            // Проверка на уникальность логина
             $existingUser = User::where('login', $data['login'])->first();
             if ($existingUser) {
                 return new View('site.signup', ['error' => 'Пользователь с таким логином уже существует!']);
             }
-            $data['id_role'] = 1; // По умолчанию sysadmin
-            $data['password'] = md5($data['password']); // Хешируем пароль
+            $data['id_role'] = 1;
+            $data['password'] = md5($data['password']);
             if (User::create($data)) {
                 app()->route->redirect('/hello');
             }
@@ -67,7 +66,6 @@ class Site
         app()->route->redirect('/login');
     }
 
-    // Проверка, является ли пользователь системным администратором (role = sysadmin, id_role = 1)
     private function isSysAdmin(): bool
     {
         if (!Auth::check()) return false;
@@ -75,7 +73,6 @@ class Site
         return $user->id_role == 1;
     }
 
-    // Проверка, является ли пользователь администратором (role = admin, id_role = 2)
     private function isAdmin(): bool
     {
         if (!Auth::check()) return false;
@@ -85,7 +82,6 @@ class Site
 
     // ==================== ДОСТУПНО ТОЛЬКО ДЛЯ СИСАДМИНА ====================
 
-    // Список абонентов с фильтром по подразделению
     public function subscribers(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -93,8 +89,6 @@ class Site
         }
 
         $query = Subscriber::with('subdivision', 'phones');
-
-        // Фильтр по подразделению
         $subdivisionId = $request->get('subdivision_id');
         if ($subdivisionId && $subdivisionId !== '') {
             $query->where('subdivision_id', $subdivisionId);
@@ -110,7 +104,6 @@ class Site
         ]);
     }
 
-    // Форма добавления нового абонента
     public function createSubscriber(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -130,7 +123,6 @@ class Site
         ]);
     }
 
-    // Привязка телефона к абоненту
     public function attachPhone(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -151,7 +143,6 @@ class Site
         ]);
     }
 
-    // Отчет: количество абонентов по подразделениям
     public function reportBySubdivision(): string
     {
         if (!$this->isSysAdmin()) {
@@ -162,7 +153,6 @@ class Site
         return new View('site.report_subdivision', ['subdivisions' => $subdivisions]);
     }
 
-    // Отчет: количество телефонов по помещениям
     public function reportByRoom(): string
     {
         if (!$this->isSysAdmin()) {
@@ -173,7 +163,6 @@ class Site
         return new View('site.report_room', ['rooms' => $rooms]);
     }
 
-    // Управление подразделениями
     public function subdivisions(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -187,7 +176,7 @@ class Site
         }
 
         $subdivisions = Subdivision::with('type')->get();
-        $types = TypeOfUnit::all(); // Нужно добавить эту модель
+        $types = TypeOfUnit::all();
 
         return new View('site.subdivisions', [
             'subdivisions' => $subdivisions,
@@ -195,7 +184,6 @@ class Site
         ]);
     }
 
-// Управление помещениями
     public function rooms(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -214,7 +202,7 @@ class Site
             'subdivisions' => $subdivisions
         ]);
     }
-    // Управление телефонами
+
     public function phones(Request $request): string
     {
         if (!$this->isSysAdmin()) {
@@ -234,33 +222,6 @@ class Site
         ]);
     }
 
-    // ==================== ДОСТУПНО ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ====================
-
-    // Создание нового сисадмина (только для администратора)
-    public function createSysAdmin(Request $request): string
-    {
-        if (!$this->isAdmin()) {
-            app()->route->redirect('/hello?message=Доступ запрещен. Требуются права администратора.');
-        }
-
-        if ($request->method === 'POST') {
-            // Проверка на уникальность логина
-            $existingUser = User::where('login', $request->get('login'))->first();
-            if ($existingUser) {
-                return new View('site.create_sysadmin', ['error' => 'Пользователь с таким логином уже существует!']);
-            }
-
-            $data = $request->all();
-            $data['id_role'] = 1; // id_role = 1 для sysadmin
-            $data['password'] = md5($data['password']); // Хешируем пароль
-
-            if (User::create($data)) {
-                app()->route->redirect('/hello?message=Системный администратор создан. Логин: ' . $data['login']);
-            }
-        }
-        return new View('site.create_sysadmin');
-    }
-// Удаление подразделения
     public function deleteSubdivision($id): void
     {
         if (!$this->isSysAdmin()) {
@@ -268,15 +229,24 @@ class Site
         }
 
         $subdivision = Subdivision::find($id);
-        if ($subdivision) {
-            $subdivision->delete();
-            app()->route->redirect('/subdivisions?message=Подразделение удалено');
-        } else {
+        if (!$subdivision) {
             app()->route->redirect('/subdivisions?message=Подразделение не найдено');
         }
+
+        if ($subdivision->rooms()->count() > 0) {
+            app()->route->redirect('/subdivisions?message=❌ Нельзя удалить: сначала удалите все помещения');
+            return;
+        }
+
+        if ($subdivision->subscribers()->count() > 0) {
+            app()->route->redirect('/subdivisions?message=❌ Нельзя удалить: сначала удалите всех абонентов');
+            return;
+        }
+
+        $subdivision->delete();
+        app()->route->redirect('/subdivisions?message=Подразделение удалено');
     }
 
-// Удаление помещения
     public function deleteRoom($id): void
     {
         if (!$this->isSysAdmin()) {
@@ -284,20 +254,19 @@ class Site
         }
 
         $room = Room::find($id);
-        if ($room) {
-            // Сначала удаляем связанные телефоны
-            foreach ($room->phones as $phone) {
-                $phone->subscribers()->detach();
-                $phone->delete();
-            }
-            $room->delete();
-            app()->route->redirect('/rooms?message=Помещение удалено');
-        } else {
+        if (!$room) {
             app()->route->redirect('/rooms?message=Помещение не найдено');
         }
+
+        if ($room->phones()->count() > 0) {
+            app()->route->redirect('/rooms?message=❌ Нельзя удалить: сначала удалите все телефоны');
+            return;
+        }
+
+        $room->delete();
+        app()->route->redirect('/rooms?message=Помещение удалено');
     }
 
-// Удаление телефона
     public function deletePhone($id): void
     {
         if (!$this->isSysAdmin()) {
@@ -306,12 +275,120 @@ class Site
 
         $phone = Phone::find($id);
         if ($phone) {
-            // Отвязываем от абонентов
-            $phone->subscribers()->detach();
             $phone->delete();
             app()->route->redirect('/phones?message=Телефон удален');
         } else {
             app()->route->redirect('/phones?message=Телефон не найден');
+        }
+    }
+
+    public function deleteSubscriber($id): void
+    {
+        if (!$this->isSysAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $subscriber = Subscriber::find($id);
+        if ($subscriber) {
+            $subscriber->delete();
+            app()->route->redirect('/subscribers?message=Абонент удален');
+        } else {
+            app()->route->redirect('/subscribers?message=Абонент не найден');
+        }
+    }
+
+    // ==================== ДОСТУПНО ТОЛЬКО ДЛЯ АДМИНИСТРАТОРА ====================
+
+    public function createSysAdmin(Request $request): string
+    {
+        if (!$this->isAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен. Требуются права администратора.');
+        }
+
+        if ($request->method === 'POST') {
+            $existingUser = User::where('login', $request->get('login'))->first();
+            if ($existingUser) {
+                return new View('site.create_sysadmin', ['error' => 'Пользователь с таким логином уже существует!']);
+            }
+
+            $data = $request->all();
+            $data['id_role'] = 1;
+            $data['password'] = md5($data['password']);
+
+            if (User::create($data)) {
+                app()->route->redirect('/admin/sysadmins?message=Системный администратор создан');
+            }
+        }
+        return new View('site.create_sysadmin');
+    }
+
+    public function listSysAdmins(): string
+    {
+        if (!$this->isAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $sysAdmins = User::where('id_role', 1)->get();
+        return new View('site.list_sysadmins', ['sysAdmins' => $sysAdmins]);
+    }
+
+    public function editSysAdmin(Request $request, $id): string
+    {
+        if (!$this->isAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        $sysAdmin = User::where('id_role', 1)->where('id_user', $id)->first();
+
+        if (!$sysAdmin) {
+            app()->route->redirect('/?message=Системный администратор не найден');
+        }
+
+        if ($request->method === 'POST') {
+            $data = $request->all();
+
+            if ($data['login'] !== $sysAdmin->login) {
+                $existingUser = User::where('login', $data['login'])->first();
+                if ($existingUser) {
+                    return new View('site.edit_sysadmin', [
+                        'sysAdmin' => $sysAdmin,
+                        'error' => 'Пользователь с таким логином уже существует!'
+                    ]);
+                }
+            }
+
+            $sysAdmin->name = $data['name'];
+            $sysAdmin->login = $data['login'];
+
+            if (!empty($data['password'])) {
+                $sysAdmin->password = md5($data['password']);
+            }
+
+            $sysAdmin->save();
+            app()->route->redirect('/?message=Системный администратор обновлён');
+        }
+
+        return new View('site.edit_sysadmin', ['sysAdmin' => $sysAdmin]);
+    }
+
+    public function deleteSysAdmin($id): void
+    {
+        if (!$this->isAdmin()) {
+            app()->route->redirect('/hello?message=Доступ запрещен');
+        }
+
+        if ($id == Auth::user()->id_user) {
+            app()->route->redirect('/?message=❌ Нельзя удалить самого себя');
+            return;
+        }
+
+        $sysAdmin = User::where('id_role', 1)->where('id_user', $id)->first();
+
+        if ($sysAdmin) {
+            $sysAdmin->delete();
+            app()->route->redirect('/?message=Системный администратор удалён');
+        } else {
+            app()->route->redirect('/?message=Системный администратор не найден');
         }
     }
 }

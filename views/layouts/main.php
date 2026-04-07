@@ -40,18 +40,16 @@
         <a href="<?= app()->route->getUrl('/') ?>">Главная</a>
 
         <?php if (app()->auth::check()): ?>
-            <?php
-            $user = app()->auth::user();
-            // В вашей БД: id_role = 1 -> sysadmin, id_role = 2 -> admin
-            ?>
+            <?php $user = app()->auth::user(); ?>
 
-            <?php if ($user->id_role == 1): // Системный администратор ?>
+            <?php if ($user->id_role == 1): ?>
                 <a href="<?= app()->route->getUrl('/subscribers') ?>">Абоненты</a>
                 <a href="<?= app()->route->getUrl('/subdivisions') ?>">Подразделения</a>
                 <a href="<?= app()->route->getUrl('/rooms') ?>">Помещения</a>
                 <a href="<?= app()->route->getUrl('/phones') ?>">Телефоны</a>
                 <a href="<?= app()->route->getUrl('/report/subdivision') ?>">Отчеты</a>
-            <?php elseif ($user->id_role == 2): // Администратор ?>
+            <?php elseif ($user->id_role == 2): ?>
+                <a href="<?= app()->route->getUrl('/admin/sysadmins') ?>">Системные администраторы</a>
                 <a href="<?= app()->route->getUrl('/admin/create-sysadmin') ?>">Создать сисадмина</a>
             <?php endif; ?>
 

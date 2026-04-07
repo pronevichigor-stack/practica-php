@@ -23,27 +23,29 @@
 
     <!-- Список помещений -->
     <h3>Список помещений</h3>
-    <table>
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Тип</th>
-            <th>Подразделение</th>
-            <th>Действия</th>
+        <tr style="background: #f0f0f0;">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">ID</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Название</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Тип</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Подразделение</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Действия</th>
         </tr>
         </thead>
         <tbody>
         <?php if (empty($rooms)): ?>
-            <tr><td colspan="5" style="text-align: center;">Нет помещений</td></tr>
+            <tr>
+                <td colspan="5" style="padding: 10px; text-align: center; border: 1px solid #ddd;">Нет помещений</td>
+            </tr>
         <?php else: ?>
             <?php foreach ($rooms as $room): ?>
                 <tr>
-                    <td><?= $room->room_id ?></td>
-                    <td><?= htmlspecialchars($room->name) ?></td>
-                    <td><?= htmlspecialchars($room->type ?? '—') ?></td>
-                    <td><?= htmlspecialchars($room->subdivision->name ?? '—') ?></td>
-                    <td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= $room->room_id ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= htmlspecialchars($room->name) ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= htmlspecialchars($room->type ?? '—') ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= htmlspecialchars($room->subdivision->name ?? '—') ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">
                         <a href="<?= app()->route->getUrl('/room/delete/' . $room->room_id) ?>"
                            onclick="return confirm('Удалить помещение?')"
                            style="color: red; text-decoration: none;">🗑 Удалить</a>

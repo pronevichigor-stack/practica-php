@@ -6,7 +6,6 @@
         <a href="<?= app()->route->getUrl('/subscribers/attach-phone') ?>" class="btn">📞 Привязать телефон</a>
     </div>
 
-    <!-- Фильтр -->
     <form method="get" class="filter-form">
         <label>Фильтр по подразделению:</label>
         <select name="subdivision_id" onchange="this.form.submit()">
@@ -31,6 +30,7 @@
             <th>Отчество</th>
             <th>Подразделение</th>
             <th>Телефоны</th>
+            <th style="text-align: center;">Действия</th>
         </tr>
         </thead>
         <tbody>
@@ -45,6 +45,11 @@
                     $numbers = $sub->phones->pluck('phone_number')->toArray();
                     echo !empty($numbers) ? implode(', ', $numbers) : '—';
                     ?>
+                </td>
+                <td style="text-align: center;">
+                    <a href="<?= app()->route->getUrl('/subscriber/delete/' . $sub->subscriber_id) ?>"
+                       onclick="return confirm('Удалить абонента <?= htmlspecialchars($sub->last_name . ' ' . $sub->first_name) ?>?')"
+                       class="btn btn-danger" style="background: #e74c3c;">🗑 Удалить</a>
                 </td>
             </tr>
         <?php endforeach; ?>

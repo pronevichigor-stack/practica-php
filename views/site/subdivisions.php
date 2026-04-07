@@ -22,25 +22,27 @@
 
     <!-- Список подразделений -->
     <h3>Список подразделений</h3>
-    <table>
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Тип</th>
-            <th>Действия</th>
+        <tr style="background: #f0f0f0;">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">ID</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Название</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Тип</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Действия</th>
         </tr>
         </thead>
         <tbody>
         <?php if (empty($subdivisions)): ?>
-            <tr><td colspan="4" style="text-align: center;">Нет подразделений</td></tr>
+            <tr>
+                <td colspan="4" style="padding: 10px; text-align: center; border: 1px solid #ddd;">Нет подразделений</td>
+            </tr>
         <?php else: ?>
             <?php foreach ($subdivisions as $sd): ?>
                 <tr>
-                    <td><?= $sd->subdivision_id ?></td>
-                    <td><?= htmlspecialchars($sd->name) ?></td>
-                    <td><?= htmlspecialchars($sd->type->name ?? '—') ?></td>  <!-- ИСПРАВЛЕНО -->
-                    <td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= $sd->subdivision_id ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= htmlspecialchars($sd->name) ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><?= htmlspecialchars($sd->type->name ?? '—') ?></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">
                         <a href="<?= app()->route->getUrl('/subdivision/delete/' . $sd->subdivision_id) ?>"
                            onclick="return confirm('Удалить подразделение?')"
                            style="color: red; text-decoration: none;">🗑 Удалить</a>
@@ -50,4 +52,4 @@
         <?php endif; ?>
         </tbody>
     </table>
-</div>
+</div>/

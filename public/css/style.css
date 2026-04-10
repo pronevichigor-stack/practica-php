@@ -1,5 +1,4 @@
 :root {
-    --primary: #007bff;
     --light-blue: #e7f1ff;
     --white: #ffffff;
     --bg: #f8f9fa;
@@ -15,7 +14,7 @@ body {
 }
 
 header {
-    background: var(--primary);
+    background: #ffffff;
     padding: 1rem 2rem;
     color: white;
 }
@@ -47,7 +46,7 @@ main {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-h2 { color: var(--primary); margin-top: 0; }
+h2 { color: #ffffff; margin-top: 0; }
 
 table {
     width: 100%;
@@ -59,7 +58,7 @@ th {
     background: var(--light-blue);
     padding: 12px;
     text-align: left;
-    border-bottom: 2px solid var(--primary);
+    border-bottom: 2px solid #ffffff;
 }
 
 td {
@@ -68,8 +67,8 @@ td {
 }
 
 .btn {
-    background: var(--primary);
-    color: white;
+    background: #ffffff;
+    color: black;
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;

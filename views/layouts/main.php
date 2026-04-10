@@ -12,9 +12,9 @@
         nav a:hover { text-decoration: underline; }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .btn { display: inline-block; background: #3498db; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; font-size: 14px; }
+        .btn { display: inline-block; background: #ffffff; color: black; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; font-size: 14px; }
         .btn-secondary { background: #95a5a6; }
-        .btn-danger { background: #e74c3c; }
+        .btn-danger { background: #95a5a6;; }
         .btn:hover { opacity: 0.9; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
@@ -26,7 +26,7 @@
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
         .menu-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .menu-card h3 { margin-bottom: 15px; color: #2c3e50; }
-        .menu-card a { display: block; margin: 10px 0; color: #3498db; text-decoration: none; }
+        .menu-card a { display: block; margin: 10px 0; text-decoration: none; }
         .menu-card a:hover { text-decoration: underline; }
         .actions { margin-bottom: 20px; }
         .filter-form { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 4px; }

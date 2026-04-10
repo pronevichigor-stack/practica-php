@@ -11,7 +11,7 @@
                 <a href="<?= app()->route->getUrl('/subscribers/attach-phone') ?>">Привязать телефон</a>
             </div>
             <div class="menu-card">
-                <h3>🏢 Справочники</h3>
+                <h3> Справочники</h3>
                 <a href="<?= app()->route->getUrl('/subdivisions') ?>">Подразделения</a>
                 <a href="<?= app()->route->getUrl('/rooms') ?>">Помещения</a>
                 <a href="<?= app()->route->getUrl('/phones') ?>">Телефоны</a>
@@ -25,12 +25,12 @@
     <?php elseif ($user->id_role == 2): // Администратор ?>
 
         <div class="menu-card" style="margin-top: 30px;">
-            <h3>👑 Администрирование</h3>
-            <a href="<?= app()->route->getUrl('/admin/create-sysadmin') ?>" class="btn">➕ Создать системного администратора</a>
+            <h3>Администрирование</h3>
+            <a href="<?= app()->route->getUrl('/admin/create-sysadmin') ?>" class="btn" >Создать системного администратора</a>
         </div>
 
         <div class="menu-card" style="margin-top: 30px;">
-            <h3>📋 Существующие системные администраторы</h3>
+            <h3>Существующие системные администраторы</h3>
             <?php
             $sysAdmins = \Model\User::where('id_role', 1)->get();
             ?>
@@ -53,11 +53,11 @@
                             <td><?= htmlspecialchars($admin->name) ?></td>
                             <td><?= htmlspecialchars($admin->login) ?></td>
                             <td style="text-align: center;">
-                                <a href="<?= app()->route->getUrl('/admin/edit/' . $admin->id_user) ?>" class="btn" style="background: #3498db;">✏ Редактировать</a>
+                                <a href="<?= app()->route->getUrl('/admin/edit/' . $admin->id_user) ?>" class="btn" style="background: #95a5a6;">Редактировать</a>
                                 <?php if ($admin->id_user != $user->id_user): ?>
-                                    <a href="<?= app()->route->getUrl('/admin/delete/' . $admin->id_user) ?>" class="btn btn-danger" onclick="return confirm('Удалить администратора <?= htmlspecialchars($admin->name) ?>?')">🗑 Удалить</a>
+                                    <a href="<?= app()->route->getUrl('/admin/delete/' . $admin->id_user) ?>" class="btn btn-danger" style="background: #95a5a6; onclick="return confirm('Удалить администратора <?= htmlspecialchars($admin->name) ?>?')">Удалить</a>
                                 <?php else: ?>
-                                    <span style="background: #95a5a6; color: white; padding: 8px 16px; border-radius: 4px;">🔒 Текущий</span>
+                                    <span style="background: #95a5a6; color: white; padding: 8px 16px; border-radius: 4px;">Текущий</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

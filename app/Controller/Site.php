@@ -332,7 +332,8 @@ class Site
         return new View('site.list_sysadmins', ['sysAdmins' => $sysAdmins]);
     }
 
-    public function editSysAdmin(Request $request, $id): string
+    // Редактирование системного администратора
+    public function editSysAdmin($id, Request $request): string
     {
         if (!$this->isAdmin()) {
             app()->route->redirect('/hello?message=Доступ запрещен');

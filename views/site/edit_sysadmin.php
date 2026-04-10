@@ -16,7 +16,7 @@
         <input type="password" name="password" placeholder="******">
 
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button type="submit" class="btn">💾 Сохранить</button>
+            <button type="submit" class="btn">Сохранить</button>
             <a href="<?= app()->route->getUrl('/') ?>" class="btn btn-secondary">Отмена</a>
         </div>
     </form>
